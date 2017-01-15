@@ -1,15 +1,7 @@
 ﻿using UnityEngine;
 
-public class SquareGrid : MonoBehaviour
+public class SquareGrid : BasicGrid
 {
-    // Dimensions of the grid.
-    public int Width = 6;
-    public int Height = 6;
-
-    // The scale factor allows us to dynamically
-    // adjust the size of the grid.
-    public float ScaleFactor = 10f;
-
     // Prefab of the square cells used to
     // create the grid.
     public SquareCell CellPrefab;
@@ -27,6 +19,17 @@ public class SquareGrid : MonoBehaviour
     public SquareCell[] Cells
     {
         get { return _cells; }
+    }
+
+    public override int GetMaxNeighbors()
+    {
+        // Each square cell can have up to eight neighbors.
+        return 8;
+    }
+
+    public override BasicCell GetBasicCell(int index)
+    {
+        return _cells[index];
     }
 
     /*

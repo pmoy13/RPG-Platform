@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class HexCell : MonoBehaviour
+public class HexCell : BasicCell
 {
     // Cube coordinates (X, Y, Z)
     public HexCoordinates Coordinates;
+
+    public HexCell[] _neighbors;
 
 	// Use this for initialization
 	private void Start () {
@@ -15,4 +17,14 @@ public class HexCell : MonoBehaviour
 	private void Update () {
 	
 	}
+
+    public override int GetIndexFromCoordinates(int gridWidth)
+    {
+        return Coordinates.X + gridWidth * Coordinates.Z;
+    }
+
+    public override BasicCell[] GetNeighbors()
+    {
+        return _neighbors;
+    }
 }

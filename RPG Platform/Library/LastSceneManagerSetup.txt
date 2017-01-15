@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Generic/Grids/Square Grid/Scenes/Test Scenes/SquareGridTestScene.unity
+- path: Assets/Generic/Engine/Movement/Scenes/Test Scenes/SPTTestScene.unity
   isLoaded: 1
   isActive: 1

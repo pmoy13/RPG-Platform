@@ -15,7 +15,7 @@ public class MinHeapTest : MonoBehaviour
         // Populate the MinHeap with random values.
 	    for (int i = 0; i < 20; i++)
 	    {
-	        testHeap.AddMinHeapNode(new MinHeapNode(i, Random.Range(0, 50)), i);
+	        testHeap.InsertMinHeapNode(i, Random.Range(0, 50));
 	    }
         testHeap.MinHeapify(0);
 	}

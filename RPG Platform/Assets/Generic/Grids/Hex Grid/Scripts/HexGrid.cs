@@ -9,17 +9,8 @@
 
 using UnityEngine;
 
-public class HexGrid : MonoBehaviour
+public class HexGrid : BasicGrid
 {
-	// Dimensions of the grid.
-    public int Width = 6;
-    public int Height = 6;
-
-    // Scale factor. All of our constants are
-    // for a unit hexagon, so multiply them by the
-    // scale factor.
-    public float ScaleFactor = 10f;
-
     // Prefab of the hexagon cells used
     // to create the grid.
     public HexCell CellPrefab;
@@ -31,6 +22,17 @@ public class HexGrid : MonoBehaviour
     // Reference to the mesh used to render the grid.
     private HexMesh _hexMesh;
 
+    public override int GetMaxNeighbors()
+    {
+        // Each hex cell can have up to six neighbors.
+        return HexMetrics.NeighborsPerHexagon;
+    }
+
+    public override BasicCell GetBasicCell(int index)
+    {
+        return _cells[index];
+    }
+
     /*
      * Method:
      *   Awake
@@ -39,14 +41,13 @@ public class HexGrid : MonoBehaviour
      *   Instantiates HexCell prefabs which are
      *   stored in the cells array.
      */
-
     private void Awake()
     {
         // Get the Hex Mesh from a child component.
         _hexMesh = GetComponentInChildren<HexMesh>();
 
         // Allocate space for each HexCell.
-        _cells = new HexCell[Height*Width];
+        _cells = new HexCell[Height * Width];
 
         // Instantiate the HexCell objects.
         int index = 0; // Used to index into the cells array.
