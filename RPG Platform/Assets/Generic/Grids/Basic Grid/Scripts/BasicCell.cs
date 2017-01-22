@@ -11,6 +11,12 @@ public abstract class BasicCell : MonoBehaviour
     public bool IsWalkable = true;
 
     // TODO: Description.
+    public abstract int X();
+
+    // TODO: Description.
+    public abstract int Z();
+
+    // TODO: Description.
     public abstract int GetIndexFromCoordinates(int gridWidth);
 
     // TODO: Description.

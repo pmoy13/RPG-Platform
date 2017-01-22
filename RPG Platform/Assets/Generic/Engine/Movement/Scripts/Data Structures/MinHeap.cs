@@ -75,12 +75,23 @@ public class MinHeap
      */
     public void InsertMinHeapNode(int index, int key)
     {
+        // Check to ensure this index doesn't already
+        // have an associated node. If it does, exit.
+        // Since we don't save the capacity, we have
+        // to compute it indirectly as the length of
+        // the positions array.
+        if (_positions[index] != _positions.Length)
+        {
+            // The node already exists in the heap.
+            return;
+        }
+
         // Update the size of the heap.
         _currSize += 1;
 
         // Add the new node to the end of the heap.
         _nodes[_currSize - 1] = new MinHeapNode(index, key);
-        _positions[_currSize - 1] = index;
+        _positions[index] = _currSize - 1;
 
         // Restore the heap property.
         this.DecreaseKey(index, key);

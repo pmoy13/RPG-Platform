@@ -38,6 +38,16 @@ public class SquareCell : BasicCell
         _neighbors[(int)direction] = cell;
     }
 
+    public override int X()
+    {
+        return Coordinates.X;
+    }
+
+    public override int Z()
+    {
+        return Coordinates.Z;
+    }
+
     public override int GetIndexFromCoordinates(int gridWidth)
     {
         return (Coordinates.X + gridWidth * Coordinates.Z);

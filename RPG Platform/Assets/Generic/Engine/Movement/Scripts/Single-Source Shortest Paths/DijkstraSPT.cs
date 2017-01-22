@@ -7,7 +7,10 @@
  *   used to calculate the shortest path from a 
  *   single grid vertex to every other vertex. It
  *   uses Dijkstra's algorithm with a min heap
- *   data structure.
+ *   data structure. This algorithm should be used to
+ *   calculate all of the possible moves for a creature
+ *   during structured time. Individual moves should
+ *   be done with A* instead.
  */
 
  /*

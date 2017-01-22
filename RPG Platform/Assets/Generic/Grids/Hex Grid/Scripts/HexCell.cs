@@ -18,6 +18,17 @@ public class HexCell : BasicCell
 	
 	}
 
+    // Getters for the coordinates of the cell.
+    public override int X()
+    {
+        return Coordinates.X;
+    }
+
+    public override int Z()
+    {
+        return Coordinates.Z;
+    }
+
     public override int GetIndexFromCoordinates(int gridWidth)
     {
         return Coordinates.X + gridWidth * Coordinates.Z;
