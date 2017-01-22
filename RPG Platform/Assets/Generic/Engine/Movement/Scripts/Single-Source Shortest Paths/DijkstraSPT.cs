@@ -15,11 +15,12 @@
   *   DijkstraSPT
   *   
   * Description:
-  *   This is a static class with a single static
-  *   method. The method takes a grid vertex as
-  *   input and returns the shortest path distance
-  *   from that vertex to each vertex in the grid.
-  *   It uses Dijkstra's algorithm.
+  *   This is a static class with a static method
+  *   which takes a grid vertex as input and returns
+  *   the shortest path distance from that vertex
+  *   to each vertex in the grid. It uses Dijkstra's
+  *   algorithm. It also contains helper methods
+  *   to facilitate the running of the algorithm.
   */
 public static class DijkstraSPT
 {
@@ -60,15 +61,7 @@ public static class DijkstraSPT
             distancesFromSource[currVertex] = int.MaxValue;
 
             // Assign the edge weights.
-            if (grid.GetBasicCell(currVertex).IsDangerousTerrain)
-            {
-                // Dangerous terrain costs double normal terrain to traverse.
-                edgeWeights[currVertex] = 2;
-            }
-            else
-            {
-                edgeWeights[currVertex] = 1;
-            }
+            edgeWeights[currVertex] = CalculateEdgeWeight(grid, currVertex);
 
             // Create a new MinHeapNode and add it to the MinHeap.
             minHeap.InsertMinHeapNode(currVertex, int.MaxValue);
@@ -128,5 +121,35 @@ public static class DijkstraSPT
 
         // All shortest paths have been calculated.
         return distancesFromSource;
+    }
+
+    /*
+     * Method:
+     *   CalculateEdgeWeight
+     * 
+     * Description:
+     *   Takes an index into the vertex array for a grid, and
+     *   calculates the movement cost to move into that
+     *   cell of the grid. This represents the weight of
+     *   the edge between this cell and any of its neighbors.
+     */
+    private static int CalculateEdgeWeight(BasicGrid grid, int vertexNum)
+    {
+        // The movement cost associated with this cell.
+        int movementCost = 0;
+
+        // Calculate the movement cost.
+        if (grid.GetBasicCell(vertexNum).IsDangerousTerrain)
+        {
+            // Dangerous terrain costs double normal terrain to traverse.
+            movementCost = 2;
+        }
+        else
+        {
+            movementCost = 1;
+        }
+
+        // Return the calculated cost.
+        return movementCost;
     }
 }

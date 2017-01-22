@@ -54,6 +54,12 @@ public class MinHeap
 
         // Initially has no nodes.
         _currSize = 0;
+
+        // Initialize each vertex as not containing valid data.
+        for (int index = 0; index < capacity; index++)
+        {
+            _positions[index] = capacity;
+        }
     }
 
     /*
