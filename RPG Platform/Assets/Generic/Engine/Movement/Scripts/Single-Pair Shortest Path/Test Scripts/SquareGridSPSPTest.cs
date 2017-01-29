@@ -8,6 +8,7 @@ public class SquareGridSPSPTest : MonoBehaviour {
     public AStarResults results;
     public List<int> path;
     public int weight;
+    public DD5eSystem RpgSystem;
 
     // Use this for initialization
     void Start()
@@ -15,11 +16,21 @@ public class SquareGridSPSPTest : MonoBehaviour {
         grid.Cells[5].IsWalkable = false;
         grid.Cells[6].IsWalkable = false;
         grid.Cells[7].IsWalkable = false;
-        results = AStar.CalculateSquareGridPath(grid, 12, 0, int.MaxValue);
+        RpgSystem = new DD5eSystem();
+        results = AStar.CalculateSquareGridPath(grid, RpgSystem.CalculateMovementCost,
+                                                    5, 10, int.MaxValue);
 
         path = new List<int>();
-        path = results.path;
-        weight = results.pathWeight;
+        if (results != null)
+        {
+            path = results.path;
+            weight = results.pathWeight;
+        }
+        else
+        {
+            Debug.Log("No valid path found!");
+        }
+        
     }
 
     // Update is called once per frame

@@ -45,14 +45,15 @@ public static class AStar
      *   it returns null to denote the creature cannot make the
      *   specified move with the given maximum distance.
      */
-    public static AStarResults CalculateSquareGridPath(
-        SquareGrid grid, int source, int dest, int totalMoves)
+    public static AStarResults CalculateSquareGridPath(SquareGrid grid,
+        Func<BasicCell, int, float> edgeFunc, int source, int dest, int totalMoves)
     {
         // Calculate the shortest path using the A* algorithm.
-        AStarResults results = CalculatePath(grid, source, dest, SquareGridHeuristic);
+        AStarResults results = CalculatePath(grid, new AdjacencyList(grid, edgeFunc),
+                                   source, dest, SquareGridHeuristic);
 
         // Does the path exist and cost less than the allowable cost?
-        if (results.path != null && results.pathWeight <= totalMoves)
+        if (results != null && results.pathWeight <= totalMoves)
         {
             // Yes, so return it.
             return results;
@@ -77,24 +78,17 @@ public static class AStar
      *   this function returns null to denote the destination is
      *   unreachable from the source.
      */
-    private static AStarResults CalculatePath(
-        BasicGrid grid, int source, int dest, Func<BasicCell, BasicCell, int> heuristic)
+    private static AStarResults CalculatePath(BasicGrid grid,
+        AdjacencyList graph, int source, int dest, Func<BasicCell, BasicCell, int> heuristic)
     {
         // The total number of vertices in the grid.
-        int numVertices = grid.GetNumVertices();
-
-        // The maximum number of neighbors a grid cell can have.
-        int maxNeighbors = grid.GetMaxNeighbors();
+        int numVertices = graph.Nodes.Length;
 
         // Holds the weight of the path from the source to each vertex.
-        int[] distancesFromSource = new int[numVertices];
+        float[] distancesFromSource = new float[numVertices];
 
         // Holds the previous vertex in the shortest path to a vertex.
         int[] predecessors = new int[numVertices];
-
-        // Holds the movement cost to traverse a cell. We think of the
-        // grid as a undirected graph with weighted edges.
-        int[] edgeWeights = new int[numVertices];
 
         // Create the MinHeap to hold the edges (neighbors) of the grid.
         MinHeap minHeap = new MinHeap(numVertices);
@@ -103,10 +97,7 @@ public static class AStar
         for (int currVertex = 0; currVertex < numVertices; currVertex++)
         {
             // Current path to this vertex has infinite weight.
-            distancesFromSource[currVertex] = int.MaxValue;
-
-            // Assign the edge weights.
-            edgeWeights[currVertex] = CalculateEdgeWeight(grid, currVertex);
+            distancesFromSource[currVertex] = float.MaxValue;
 
             // There are no predecessors at the start of the algorithm.
             predecessors[currVertex] = int.MaxValue;
@@ -124,55 +115,44 @@ public static class AStar
         {
             // Extract the vertex closest to the source. This vertex's distance
             // has been finalized.
-            MinHeapNode currNode = minHeap.ExtractMin();
+            MinHeapNode minHeapNode = minHeap.ExtractMin();
 
-            // Get the index into the grid's Cells array.
-            int minIndex = currNode.vertexNum;
+            // Get the index into the graph's array of edge linked lists.
+            int minIndex = minHeapNode.VertexNum;
 
-            // Is this the destination? If so, then we can end the loop.
-            if (minIndex == dest)
-            {
-                // The shortest path has already been calculated. Exit.
-                break;
-            }
+            // Get the start of the linked list of neighbors.
+            AdjacencyNode currAdjNode = graph.Nodes[minIndex];
 
-            // Get all of the neighbors of the current cell.
-            BasicCell[] neighbors = grid.GetBasicCell(minIndex).GetNeighbors();
-
-            // Loop through each of the neighbors. See if we can find a path
+            // Loop through each of the edges. See if we can find a path
             // through the current cell to a neighbor which is shorter than the
             // current path to that neighbor.
-            for (int currNeighbor = 0; currNeighbor < maxNeighbors; currNeighbor++)
+            while (currAdjNode != null)
             {
-                BasicCell neighbor = neighbors[currNeighbor];
+                // Get the vertex number of the neighboring cell.
+                int neighbor = currAdjNode.Neighbor;
 
-                // Is there a neighbor at this index? If so, is it traversible?
-                // Not every cell has the maximum number of neighbors.
-                if (neighbor != null && neighbor.IsWalkable)
+                // Is the distance from the neighbor through the current
+                // node shorter than its current distance from the source?
+                if (distancesFromSource[minIndex] != int.MaxValue && // Protects from overflow.
+                    ((currAdjNode.EdgeWeight + distancesFromSource[minIndex])
+                        < distancesFromSource[neighbor]))
                 {
-                    // Yes, so extract its index.
-                    int currIndex = neighbor.GetIndexFromCoordinates(grid.Width);
+                    // Set the new shortest path value.
+                    distancesFromSource[neighbor] =
+                        distancesFromSource[minIndex] + currAdjNode.EdgeWeight;
 
-                    // Is the distance from the neighbor through the current
-                    // node shorter than its current distance from the source?
-                    if (distancesFromSource[minIndex] != int.MaxValue && // Protects from overflow.
-                        ((edgeWeights[currIndex] + distancesFromSource[minIndex])
-                            < distancesFromSource[currIndex]))
-                    {
-                        // Set the new shortest path value.
-                        distancesFromSource[currIndex] =
-                            distancesFromSource[minIndex] + edgeWeights[currIndex];
+                    // Create a new node in the MinHeap with the heuristic.
+                    // Note that if a node already exists in the MinHeap, this
+                    // will not add a new node, but rather it will exit early.
+                    minHeap.InsertMinHeapNode(neighbor, distancesFromSource[neighbor] +
+                        heuristic(grid.GetBasicCell(neighbor), grid.GetBasicCell(dest)));
 
-                        // Create a new node in the MinHeap with the heuristic.
-                        // Note that if a node already exists in the MinHeap, this
-                        // will not add a new node, but rather it will exit early.
-                        minHeap.InsertMinHeapNode(currIndex, distancesFromSource[currIndex] +
-                            heuristic(grid.GetBasicCell(currIndex), grid.GetBasicCell(dest)));
-
-                        // Assign the current node's predecessor.
-                        predecessors[currIndex] = minIndex;
-                    }
+                    // Assign the current node's predecessor.
+                    predecessors[neighbor] = minIndex;
                 }
+
+                // Go to the next edge in the linked list.
+                currAdjNode = currAdjNode.NextNode;
             }
         }
 
@@ -196,44 +176,17 @@ public static class AStar
 
             // The path has been calculated, but in reverse order.
             // Return the correct ordering, as well as the path weight.
+            // Convert from a float to an int, to compensate for the
+            // possibility of diagonals being counted for 1.5 then
+            // rounded down.
             path.Reverse();
-            return new AStarResults(path, distancesFromSource[dest]);
+            return new AStarResults(path, (int)distancesFromSource[dest]);
         }
         else
         {
             // No valid path found.
             return null;
         }
-    }
-
-    /*
-     * Method:
-     *   CalculateEdgeWeight
-     * 
-     * Description:
-     *   Takes an index into the vertex array for a grid, and
-     *   calculates the movement cost to move into that
-     *   cell of the grid. This represents the weight of
-     *   the edge between this cell and any of its neighbors.
-     */
-    private static int CalculateEdgeWeight(BasicGrid grid, int vertexNum)
-    {
-        // The movement cost associated with this cell.
-        int movementCost = 0;
-
-        // Calculate the movement cost.
-        if (grid.GetBasicCell(vertexNum).IsDangerousTerrain)
-        {
-            // Dangerous terrain costs double normal terrain to traverse.
-            movementCost = 2;
-        }
-        else
-        {
-            movementCost = 1;
-        }
-
-        // Return the calculated cost.
-        return movementCost;
     }
 
     /*

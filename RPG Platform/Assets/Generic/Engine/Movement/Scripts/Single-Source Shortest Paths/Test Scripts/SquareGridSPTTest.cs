@@ -6,7 +6,8 @@ using UnityEngine;
 public class SquareGridSPTTest : MonoBehaviour
 {
     public SquareGrid grid;
-    public int[] distances;
+    public float[] distances;
+    public DD5eSystem RpgSystem;
 
 	// Use this for initialization
 	void Start ()
@@ -14,7 +15,9 @@ public class SquareGridSPTTest : MonoBehaviour
 	    grid.Cells[5].IsWalkable = false;
 	    grid.Cells[6].IsWalkable = false;
 	    grid.Cells[7].IsWalkable = false;
-		distances = DijkstraSPT.CalculatePaths(grid, 12);
+        RpgSystem = new DD5eSystem();
+		distances = DijkstraSPT.CalculatePaths(
+            new AdjacencyList(grid, RpgSystem.CalculateMovementCost), 12);
 	}
 	
 	// Update is called once per frame
