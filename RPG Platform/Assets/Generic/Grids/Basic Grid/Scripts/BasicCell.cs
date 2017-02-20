@@ -1,7 +1,24 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/*
+ * File:
+ *   BasicCell.cs
+ * 
+ * Description:
+ *   This file contains the implementation of a basic
+ *   cell, which is the component of a basic grid.
+ *   Basic cells provide the base class for both hex
+ *   and square cells.
+ */
+
 using UnityEngine;
 
+/*
+ * Class:
+ *   BasicCell
+ * 
+ * Description:
+ *   This is an abstract class that contains methods and
+ *   members common to both square and hex cells.
+ */
 public abstract class BasicCell : MonoBehaviour
 {
     // Dangerous terrain costs double to move over.
@@ -10,15 +27,43 @@ public abstract class BasicCell : MonoBehaviour
     // Some terrain cannot be traversed.
     public bool IsWalkable = true;
 
-    // TODO: Description.
+    /*
+     * Method:
+     *   X
+     * 
+     * Description:
+     *   A getter for the private member x, which is the
+     *   x coordinate of the cell.
+     */
     public abstract int X();
 
-    // TODO: Description.
+    /*
+     * Method:
+     *   Z
+     * 
+     * Description:
+     *   A getter for the private member z, which is the
+     *   z coordinate of the cell.
+     */
     public abstract int Z();
 
-    // TODO: Description.
+    /*
+     * Method:
+     *   GetIndexFromCoordinates
+     * 
+     * Description:
+     *   Returns the index of this cell within the grid surrounding it.
+     */
     public abstract int GetIndexFromCoordinates(int gridWidth);
 
-    // TODO: Description.
+    /*
+     * Method:
+     *   GetNeighbors
+     * 
+     * Description:
+     *   Returns all neighbors of the cell. Note that some
+     *   entries in the returned array may be null, if the cell
+     *   has no neighbor in that direction.
+     */
     public abstract BasicCell[] GetNeighbors();
 }

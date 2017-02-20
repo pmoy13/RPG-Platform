@@ -1,12 +1,43 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿/*
+ * File:
+ *   AdjacencyList.cs
+ * 
+ * Description:
+ *   This file contains the implementation of an adjacency list
+ *   and its nodes. This is one way to represent a graph, and it
+ *   is the chosen method for our movement algorithms.
+ */
 
+using System;
+
+/*
+ * Class:
+ *   AdjacencyList
+ * 
+ * Description:
+ *   This class is an implementation of the adjacency list
+ *   representation of a graph. It is an array of vertices,
+ *   with each cell of the array containing a linked list
+ *   of nodes that represent edges from that vertex.
+ */
 public class AdjacencyList
 {
     // The array of edge lists, indexed
     // by vertex number.
     public AdjacencyNode[] Nodes;
+
+    /*
+     * Method:
+     *   AdjacencyList
+     * 
+     * Description:
+     *   Creates a new instance of the adjacency
+     *   list class, with no data.
+     */
+    public AdjacencyList(int numNodes)
+    {
+        Nodes = new AdjacencyNode[numNodes];
+    }
 
     /*
      * Method:
@@ -80,7 +111,6 @@ public class AdjacencyList
             Nodes[index] = prevNode;
         }
     }
-
 }
 
 /*

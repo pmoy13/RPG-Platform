@@ -33,40 +33,6 @@ public static class AStar
 {
     /*
      * Method:
-     *   CalculateSquareGridPath
-     * 
-     * Description:
-     *   Calculates the shortest path between the given source
-     *   and destination cells in a square grid, then checks to
-     *   see if that path exists, and if the path exists it checks
-     *   to see whether or not the weight of the shortest path is
-     *   less than or equal to the movement cost passed in. If it
-     *   is, then the path and its cost are returned, otherwise
-     *   it returns null to denote the creature cannot make the
-     *   specified move with the given maximum distance.
-     */
-    public static AStarResults CalculateSquareGridPath(SquareGrid grid,
-        Func<BasicCell, int, float> edgeFunc, int source, int dest, int totalMoves)
-    {
-        // Calculate the shortest path using the A* algorithm.
-        AStarResults results = CalculatePath(grid, new AdjacencyList(grid, edgeFunc),
-                                   source, dest, SquareGridHeuristic);
-
-        // Does the path exist and cost less than the allowable cost?
-        if (results != null && results.pathWeight <= totalMoves)
-        {
-            // Yes, so return it.
-            return results;
-        }
-        // No, so the path is invalid.
-        else
-        {
-            return null;
-        }
-    }
-
-    /*
-     * Method:
      *   CalculatePath
      * 
      * Description:
@@ -78,8 +44,8 @@ public static class AStar
      *   this function returns null to denote the destination is
      *   unreachable from the source.
      */
-    private static AStarResults CalculatePath(BasicGrid grid,
-        AdjacencyList graph, int source, int dest, Func<BasicCell, BasicCell, int> heuristic)
+    public static AStarResults CalculatePath(int gridWidth,
+        AdjacencyList graph, int source, int dest, Func<int, int, int, int> heuristic)
     {
         // The total number of vertices in the grid.
         int numVertices = graph.Nodes.Length;
@@ -115,10 +81,7 @@ public static class AStar
         {
             // Extract the vertex closest to the source. This vertex's distance
             // has been finalized.
-            MinHeapNode minHeapNode = minHeap.ExtractMin();
-
-            // Get the index into the graph's array of edge linked lists.
-            int minIndex = minHeapNode.VertexNum;
+            int minIndex = minHeap.ExtractMin();
 
             // Get the start of the linked list of neighbors.
             AdjacencyNode currAdjNode = graph.Nodes[minIndex];
@@ -145,7 +108,7 @@ public static class AStar
                     // Note that if a node already exists in the MinHeap, this
                     // will not add a new node, but rather it will exit early.
                     minHeap.InsertMinHeapNode(neighbor, distancesFromSource[neighbor] +
-                        heuristic(grid.GetBasicCell(neighbor), grid.GetBasicCell(dest)));
+                        heuristic(gridWidth, neighbor, dest));
 
                     // Assign the current node's predecessor.
                     predecessors[neighbor] = minIndex;
@@ -187,28 +150,6 @@ public static class AStar
             // No valid path found.
             return null;
         }
-    }
-
-    /*
-     * Method:
-     *   SquareGridHeuristic
-     * 
-     * Description:
-     *   This is the heuristic used when running the A*
-     *   algorithm on square grid objects. It is an
-     *   admissible heuristic, so it will never overestimate
-     *   the true cost of moving between the two cells.
-     */
-    private static int SquareGridHeuristic(BasicCell node, BasicCell dest)
-    {
-        // For square grids, the smallest possible distance from two cells
-        // would be moving diagonally, where in one move you can cover both
-        // a step in the X direction and a step in the Z direction. Thus,
-        // to make sure we do not overestimate the distance between the cells
-        // we just take the maximum of the differences between the source and
-        // destination cells' X and Z values.
-        return Math.Max(Math.Abs(node.X() - dest.X()),
-                         Math.Abs(node.Z() - dest.Z()));
     }
 }
 

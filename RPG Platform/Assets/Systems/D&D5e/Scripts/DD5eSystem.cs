@@ -12,6 +12,11 @@ public class DD5eSystem : RPGSystem
     private static float _normalTerrainCost = 1;
     private static float _dangerousTerrainCost = 2 * _normalTerrainCost;
 
+    // Sizes of various creatures in a square grid.
+    public static int SquareMediumSize = 1;
+    public static int SquareLargeSize = 2;
+    public static int SquareHugeSize = 3;
+
     /*
      * Method:
      *   CalculateMovementCost
@@ -90,5 +95,136 @@ public class DD5eSystem : RPGSystem
         {
             return _normalTerrainCost;
         }
+    }
+
+    /*
+     * Method:
+     *   CalculateSquareGridMovementCost
+     * 
+     * Description:
+     *   Calculates the movement cost for a creature of a given size
+     *   in the given direction. Only works for a square grid.
+     */
+    public float CalculateSquareGridMovementCost(SquareCell baseCell, int size,
+        SquareDirection direction)
+    {
+        // Keep track of the maximum movement cost we've seen. This
+        // is the movement cost between two adjacent cells, and the
+        // cost of the actual move will be the maximum of all of the
+        // individual costs to enter the new cells that the creature
+        // will enter.
+        float maxMoveCost = 0;
+
+        // Determine the row and / or column to check, and the starting cells.
+        SquareCell currentCell = baseCell;
+        SquareDirection checkDir = SquareDirection.Invalid;
+        SquareCell altCell = baseCell;
+        SquareDirection altDir = SquareDirection.Invalid;
+
+        int startLoop = size - 1;
+
+        switch (direction)
+        {
+            case SquareDirection.N:
+            {
+                while (startLoop > 0)
+                {
+                    currentCell = currentCell.GetNeighbor(SquareDirection.N);
+                    startLoop--;
+                }
+                checkDir = SquareDirection.E;
+                break;
+            }
+            case SquareDirection.NE:
+            {
+                while (startLoop > 0)
+                {
+                    currentCell = currentCell.GetNeighbor(SquareDirection.N);
+                    altCell = altCell.GetNeighbor(SquareDirection.E);
+                    startLoop--;
+                }
+                checkDir = SquareDirection.E;
+                altDir = SquareDirection.N;
+                break;
+            }
+            case SquareDirection.E:
+            {
+                while (startLoop > 0)
+                {
+                    currentCell = currentCell.GetNeighbor(SquareDirection.E);
+                    startLoop--;
+                }
+                checkDir = SquareDirection.N;
+                break;
+            }
+            case SquareDirection.SE:
+            {
+                while (startLoop > 0)
+                {
+                    currentCell = currentCell.GetNeighbor(SquareDirection.E);
+                    startLoop--;
+                }
+                checkDir = SquareDirection.N;
+                altDir = SquareDirection.E;
+                break;
+            }
+            case SquareDirection.S:
+            {
+                checkDir = SquareDirection.E;
+                break;
+            }
+            case SquareDirection.SW:
+            {
+                checkDir = SquareDirection.E;
+                altDir = SquareDirection.N;
+                break;
+            }
+            case SquareDirection.W:
+            {
+                checkDir = SquareDirection.N;
+                break;
+            }
+            case SquareDirection.NW:
+            {
+                while (startLoop > 0)
+                {
+                    currentCell = currentCell.GetNeighbor(SquareDirection.N);
+                    startLoop--;
+                }
+                checkDir = SquareDirection.E;
+                altDir = SquareDirection.N;
+                break;
+            }
+        }
+
+        // Loop through each cell on the row and / or column we need to check.
+        // Compare their movement costs to the highest-so-far movement cost, and
+        // find the maximum.
+        for (int sizeCount = 0; sizeCount < size; sizeCount++)
+        {
+            float currentMoveCost = CalculateMovementCost(currentCell,
+                                            (int)direction);
+            currentCell = currentCell.GetNeighbor(checkDir);
+
+            if (currentMoveCost > maxMoveCost)
+            {
+                maxMoveCost = currentMoveCost;
+            }
+
+            if (altDir != SquareDirection.Invalid)
+            {
+                float altMoveCost = CalculateMovementCost(altCell,
+                                            (int)direction);
+                altCell = altCell.GetNeighbor(altDir);
+
+                if (altMoveCost > maxMoveCost)
+                {
+                    maxMoveCost = altMoveCost;
+                }
+            }
+        }
+
+        // Return the max move cost.
+        return maxMoveCost;
     }
 }

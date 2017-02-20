@@ -16,8 +16,9 @@ public class SquareGridSPTTest : MonoBehaviour
 	    grid.Cells[6].IsWalkable = false;
 	    grid.Cells[7].IsWalkable = false;
         RpgSystem = new DD5eSystem();
-		distances = DijkstraSPT.CalculatePaths(
-            new AdjacencyList(grid, RpgSystem.CalculateMovementCost), 12);
+		distances = DijkstraSPT.CalculateDistances(
+            SquareMovement.GetAdjacencyListFromGrid(grid, DD5eSystem.SquareLargeSize,
+                RpgSystem.CalculateSquareGridMovementCost), 12);
 	}
 	
 	// Update is called once per frame

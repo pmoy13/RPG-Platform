@@ -11,5 +11,19 @@ public enum SquareDirection
     S,
     SW,
     W,
-    NW
+    NW,
+    Invalid
+}
+
+public static class SquareDirectionExtensions
+{
+    public static bool IsDiagonal(this SquareDirection direction)
+    {
+        if ((int) direction % 2 == 0)
+        {
+            return false;
+        }
+
+        return true;
+    }
 }

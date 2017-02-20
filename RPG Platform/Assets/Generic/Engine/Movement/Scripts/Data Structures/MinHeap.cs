@@ -18,6 +18,9 @@
  *   property: each parent node has a key
  *   less than or equal to each of its children.
  */
+
+using System;
+
 public class MinHeap
 {
     // Current number of nodes in the min heap.
@@ -37,6 +40,10 @@ public class MinHeap
     // into indices into the _nodes array so we can get the
     // corresponding min heap nodes.
     private int[] _positions;
+
+    // This is the value we will return if the min heap
+    // extract min is invoked with invalid parameters.
+    public static int InvalidExtract = int.MaxValue;
 
     /*
      * Method:
@@ -89,11 +96,13 @@ public class MinHeap
         // Update the size of the heap.
         _currSize += 1;
 
-        // Add the new node to the end of the heap.
-        _nodes[_currSize - 1] = new MinHeapNode(index, key);
+        // Add the new node to the end of the heap. We initially give
+        // the node a key of max value, so that when we decrease the key
+        // we know that the operation will complete.
+        _nodes[_currSize - 1] = new MinHeapNode(index, float.MaxValue);
         _positions[index] = _currSize - 1;
 
-        // Restore the heap property.
+        // Restore the heap property, adding in the correct key value.
         this.DecreaseKey(index, key);
     }
 
@@ -112,9 +121,9 @@ public class MinHeap
         MinHeapNode bNode = _nodes[b];
 
         // Update their indices in the MinHeap.
-        int tempPosition = _positions[aNode.VertexNum];
-        _positions[aNode.VertexNum] = _positions[bNode.VertexNum];
-        _positions[bNode.VertexNum] = tempPosition;
+        int tempPosition = _positions[aNode.index];
+        _positions[aNode.index] = _positions[bNode.index];
+        _positions[bNode.index] = tempPosition;
 
         // Swap the nodes themselves in the MinHeap.
         _nodes[a] = bNode;
@@ -147,16 +156,16 @@ public class MinHeap
 
         // Is the left child smaller than the current node?
         if ((left < _currSize) && // If the node has a left child...
-            (_nodes[left].DistanceFromStart <
-               _nodes[smallest].DistanceFromStart)) // Is the left child smaller?
+            (_nodes[left].key <
+               _nodes[smallest].key)) // Is the left child smaller?
         {
             // The left child is the smallest node we've found.
             smallest = left;
         }
         // Is the right child smaller than the current node?
         if ((right < _currSize) && // If the node has a right child...
-            (_nodes[right].DistanceFromStart <
-               _nodes[smallest].DistanceFromStart)) // Is the right child smaller?
+            (_nodes[right].key <
+               _nodes[smallest].key)) // Is the right child smaller?
         {
             // The right child is the smallest node.
             smallest = right;
@@ -195,17 +204,17 @@ public class MinHeap
      *   ExtractMin
      * 
      * Description:
-     *   Returns the MinHeapNode with the smallest key
-     *   in the MinHeap, then ensures that the resulting
+     *   Returns the index of the MinHeapNode with the smallest
+     *   key in the MinHeap, then ensures that the resulting
      *   tree still satisfies the min heap property. The
      *   returned node is removed from the heap.
      */
-    public MinHeapNode ExtractMin()
+    public int ExtractMin()
     {
         // If the heap is empty, there's nothing to extract.
         if (IsEmpty())
         {
-            return null;
+            return InvalidExtract;
         }
 
         // Save the root. (Always the minimum!)
@@ -213,7 +222,7 @@ public class MinHeap
 
         // Replace the root with the last node.
         _nodes[0] = _nodes[_currSize - 1];
-        _positions[_nodes[0].VertexNum] = 0; // Last node is now the first node.
+        _positions[_nodes[0].index] = 0; // Last node is now the first node.
 
         // Update the position of the min node getting extracted.
         // This is necessary because it allows us to determine
@@ -222,7 +231,7 @@ public class MinHeap
         // already. When used in Dijkstra's shortest path algorithm,
         // vertices whose nodes have been extracted have had their
         // shortest paths finalized.
-        _positions[root.VertexNum] = _currSize - 1;
+        _positions[root.index] = _currSize - 1;
 
         // Account for the new size after the root is removed.
         _currSize -= 1;
@@ -232,7 +241,7 @@ public class MinHeap
         MinHeapify(0);
 
         // Return the extracted node.
-        return root;
+        return root.index;
     }
 
     /*
@@ -253,19 +262,19 @@ public class MinHeap
         // Check to see if the new distance is greater than or
         // equal to the current distance. If so, then there's no
         // need to do anything - the input parameters were invalid.
-        if (_nodes[heapIndex].DistanceFromStart <= newDistance)
+        if (_nodes[heapIndex].key <= newDistance)
         {
             // Invalid input parameters.
             return;
         }
 
         // Update the node's distance value.
-        _nodes[heapIndex].DistanceFromStart = newDistance;
+        _nodes[heapIndex].key = newDistance;
 
         // Travel up and heapify the MinHeap.
         while ((heapIndex > 0) && // We haven't exhausted the entire heap.
-               (_nodes[heapIndex].DistanceFromStart <
-                  _nodes[(heapIndex + 1)/2 - 1].DistanceFromStart))
+               (_nodes[heapIndex].key <
+                  _nodes[(heapIndex + 1)/2 - 1].key))
         {
             // Parent is greater than child - swap them.
             SwapMinHeapNodes(heapIndex, (heapIndex + 1)/2 - 1);
@@ -290,6 +299,16 @@ public class MinHeap
      */
     public bool Contains(int vertexNum)
     {
+        // Check to make sure this vertex number is within
+        // the bounds of the arrays used. If not, then the
+        // given index is not in the heap, and in fact the heap
+        // not be associated with the graph this vertex came
+        // from.
+        if (vertexNum >= _positions.Length)
+        {
+            return false;
+        }
+
         // The corresponding node could still be in the array,
         // but it may be in a portion of the array that doesn't
         // contain valid data.
@@ -308,12 +327,12 @@ public class MinHeap
 public class MinHeapNode
 {
     // The index into a grid's cells array.
-    public int VertexNum;
+    public int index;
 
     // Current distance from the start node. This is the key
     // of the MinHeap - we call it distance, since we only use
     // the heap for calculating shortest paths.
-    public float DistanceFromStart;
+    public float key;
 
     /*
      * Method:
@@ -322,10 +341,10 @@ public class MinHeapNode
      * Description:
      *   Creates a new instance of the class.
      */
-    public MinHeapNode(int vertexNum, float distanceFromStart)
+    public MinHeapNode(int index, float key)
     {
         // Assign the fields.
-        this.VertexNum = vertexNum;
-        this.DistanceFromStart = distanceFromStart;
+        this.index = index;
+        this.key = key;
     }
 }

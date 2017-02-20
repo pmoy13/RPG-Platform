@@ -29,7 +29,7 @@ public static class DijkstraSPT
 {
     /*
      * Method:
-     *   CalculatePaths
+     *   CalculateDistances
      *   
      * Description:
      *   A static method which takes a grid object and
@@ -39,7 +39,7 @@ public static class DijkstraSPT
      *   Used to find the possible moves for a creature
      *   during structured movement time, like combat.
      */
-    public static float[] CalculatePaths(AdjacencyList graph, int source)
+    public static float[] CalculateDistances(AdjacencyList graph, int source)
     {
         // The total number of vertices in the graph.
         int numVertices = graph.Nodes.Length;
@@ -71,10 +71,7 @@ public static class DijkstraSPT
         {
             // Extract the vertex closest to the source. This vertex's distance
             // has been finalized.
-            MinHeapNode minHeapNode = minHeap.ExtractMin();
-
-            // Get the index into the graph's array of edge linked lists.
-            int minIndex = minHeapNode.VertexNum;
+            int minIndex = minHeap.ExtractMin();
 
             // Get the start of the linked list of neighbors.
             AdjacencyNode currAdjNode = graph.Nodes[minIndex];
