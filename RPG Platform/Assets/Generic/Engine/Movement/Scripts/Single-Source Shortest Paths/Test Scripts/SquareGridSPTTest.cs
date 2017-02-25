@@ -12,9 +12,9 @@ public class SquareGridSPTTest : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-	    grid.Cells[5].IsWalkable = false;
-	    grid.Cells[6].IsWalkable = false;
-	    grid.Cells[7].IsWalkable = false;
+	    grid.Cells[0, 1].IsWalkable = false;
+	    grid.Cells[1, 1].IsWalkable = false;
+	    grid.Cells[2, 1].IsWalkable = false;
         RpgSystem = new DD5eSystem();
 		distances = DijkstraSPT.CalculateDistances(
             SquareMovement.GetAdjacencyListFromGrid(grid, DD5eSystem.SquareLargeSize,

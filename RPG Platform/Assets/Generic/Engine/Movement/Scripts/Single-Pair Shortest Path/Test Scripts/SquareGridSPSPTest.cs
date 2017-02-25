@@ -13,9 +13,9 @@ public class SquareGridSPSPTest : MonoBehaviour {
     // Use this for initialization
     void Start()
     {
-        grid.Cells[5].IsWalkable = false;
-        grid.Cells[6].IsWalkable = false;
-        grid.Cells[7].IsWalkable = false;
+        grid.Cells[0, 1].IsWalkable = false;
+        grid.Cells[1, 1].IsWalkable = false;
+        grid.Cells[2, 1].IsWalkable = false;
         RpgSystem = new DD5eSystem();
         results = SquareMovement.CalculateSquareGridPath(grid, RpgSystem.CalculateMovementCost,
                                                     12, 0, int.MaxValue);

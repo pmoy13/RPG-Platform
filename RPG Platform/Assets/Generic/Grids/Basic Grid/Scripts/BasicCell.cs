@@ -27,6 +27,9 @@ public abstract class BasicCell : MonoBehaviour
     // Some terrain cannot be traversed.
     public bool IsWalkable = true;
 
+    // LineRenderer used to draw borders and highlight the cell.
+    private LineRenderer _lineRenderer;
+
     /*
      * Method:
      *   X
@@ -66,4 +69,7 @@ public abstract class BasicCell : MonoBehaviour
      *   has no neighbor in that direction.
      */
     public abstract BasicCell[] GetNeighbors();
+
+    // TODO: Description.
+    public abstract void Highlight(int[,] distances, float scale, int moveSpeed);
 }

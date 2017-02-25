@@ -14,7 +14,6 @@ public static class SquareMovement
      *   represents the size of the creature moving: for example,
      *   a Huge creature in Dungeons and Dragons is 3x3 square cells.
      */
-
     public static AdjacencyList GetAdjacencyListFromGrid(SquareGrid grid, int creatureSize,
         Func<SquareCell, int, SquareDirection, float> calculateEdgeCost)
     {
@@ -53,7 +52,7 @@ public static class SquareMovement
                     // Calculate the edge cost from the source to this current node.
                     // If the edge exists, add an adjacency node for it.
                     float edgeCost = calculateEdgeCost(
-                        (SquareCell)grid.GetBasicCell(widthIndex + grid.Width * heightIndex),
+                        (SquareCell)grid.GetBasicCell(widthIndex, heightIndex),
                         creatureSize, direction);
 
                     if (edgeCost != float.MaxValue)
@@ -117,6 +116,75 @@ public static class SquareMovement
 
     /*
      * Method:
+     *   CalculateDistances
+     * 
+     * Description:
+     *   Takes a square grid and calculates the distance to
+     *   each of the other cells in the grid. This function
+     *   can tolerate multiple size creatures.
+     */
+
+    public static int[,] CalculateDistances(SquareGrid grid, Creature creature,
+        Func<SquareCell, int, SquareDirection, float> calculateEdgeCost)
+    {
+        // Calculate the distances from the point of view of a graph.
+        float[] graphDistances = DijkstraSPT.CalculateDistances(
+            GetAdjacencyListFromGrid(grid, creature.SquareSize, calculateEdgeCost),
+                creature.Position);
+
+        // Allocate space to store the distances to each cell of the grid.
+        int[,] gridDistances = new int[grid.Width, grid.Height];
+
+        // At the beginning, each distance should be the maximum possible.
+        for (int gridWidth = 0; gridWidth < grid.Width; gridWidth++)
+        {
+            for (int gridHeight = 0; gridHeight < grid.Height; gridHeight++)
+            {
+                gridDistances[gridWidth, gridHeight] = int.MaxValue;
+            }
+        }
+
+        // Convert from graph to grid vertices. The distance to the grid vertex
+        // will be the minimum of the distance to each graph vertex which overlaps
+        // with the grid vertex.
+        for (int graphIndex = 0; graphIndex < graphDistances.Length; graphIndex++)
+        {
+            /*
+             * Each loop of this outer loop handles all of the grid vertices
+             * encompassed by a single graph vertex.
+             */
+
+            // Since the conversion from float to int is strange, if there's no
+            // valid path just skip the index.
+            if (graphDistances[graphIndex] == float.MaxValue)
+            {
+                continue;
+            }
+
+            int gridWidthIndex = graphIndex % (grid.Width - (creature.SquareSize - 1));
+            int gridHeightIndex = graphIndex / (grid.Width - (creature.SquareSize - 1));
+
+            // Iterate along the length of a graph vertex.
+            for (int height = 0; height < creature.SquareSize; height++)
+            {
+                // Iterate along the height of a graph vertex.
+                for (int width = 0; width < creature.SquareSize; width++)
+                {
+                    if (graphDistances[graphIndex] <
+                        (int)gridDistances[gridWidthIndex + width, gridHeightIndex + height])
+                    {
+                        gridDistances[gridWidthIndex + width, gridHeightIndex + height] =
+                            (int)graphDistances[graphIndex];
+                    }
+                }
+            }
+        }
+
+        return gridDistances;
+    }
+
+    /*
+     * Method:
      *   CalculateNeighborVertex
      * 
      * Description:
@@ -125,7 +193,6 @@ public static class SquareMovement
      *   neighbor in question is the neighbor as seen]
      *   by the graph, not the grid.
      */
-
     private static int CalculateNeighborVertex(SquareDirection direction, int source,
         int graphWidth)
     {

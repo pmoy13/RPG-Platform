@@ -63,4 +63,18 @@ public abstract class BasicGrid : MonoBehaviour
      *   cells, which we can access through this method.
      */
     public abstract BasicCell GetBasicCell(int index);
+
+    public abstract BasicCell GetBasicCell(int width, int height);
+
+    // TODO: Description.
+    public void HighlightCells(int[,] distances, int moveSpeed)
+    {
+        for (int width = 0; width < distances.GetLength(0); width++)
+        {
+            for (int height = 0; height < distances.GetLength(1); height++)
+            {
+                GetBasicCell(width, height).Highlight(distances, ScaleFactor, moveSpeed);
+            }
+        }
+    }
 }

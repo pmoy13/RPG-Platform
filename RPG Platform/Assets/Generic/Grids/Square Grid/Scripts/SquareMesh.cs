@@ -63,7 +63,7 @@ public class SquareMesh : MonoBehaviour
      *   Clears the old mesh data, then loops through
      *   each cell and triangulates the cell.
      */
-    public void Triangulate(SquareCell[] cells)
+    public void Triangulate(SquareCell[,] cells)
     {
         // Clear the old data.
         _mesh.Clear();
@@ -72,9 +72,12 @@ public class SquareMesh : MonoBehaviour
         _colors.Clear();
 
         // Loop through and triangulate each cell.
-        for (int index = 0; index < cells.Length; index++)
+        for (int width = 0; width < cells.GetLength(0); width++)
         {
-            TriangulateCell(cells[index]);
+            for (int height = 0; height < cells.GetLength(1); height++)
+            {
+                TriangulateCell(cells[width, height]);
+            }
         }
 
         // Assign the vertices, triangles and normals.

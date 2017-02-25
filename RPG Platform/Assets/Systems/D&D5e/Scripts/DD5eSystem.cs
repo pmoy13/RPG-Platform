@@ -105,7 +105,7 @@ public class DD5eSystem : RPGSystem
      *   Calculates the movement cost for a creature of a given size
      *   in the given direction. Only works for a square grid.
      */
-    public float CalculateSquareGridMovementCost(SquareCell baseCell, int size,
+    public override float CalculateSquareGridMovementCost(SquareCell baseCell, int size,
         SquareDirection direction)
     {
         // Keep track of the maximum movement cost we've seen. This

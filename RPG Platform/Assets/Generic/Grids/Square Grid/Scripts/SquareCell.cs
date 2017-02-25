@@ -57,4 +57,93 @@ public class SquareCell : BasicCell
     {
         return _neighbors;
     }
+
+    public override void Highlight(int[,] distances, float scale, int moveSpeed)
+    {
+        // If this cell isn't reachable, don't draw anything.
+        if (distances[X(), Z()] > moveSpeed)
+        {
+            return;
+        }
+
+        // Since this cell is reachable, highlight the cell to demonstrate.
+        LineRenderer lineRenderer = GetComponent<LineRenderer>();
+        List<Vector3> positions = new List<Vector3>();
+
+        // Every move adds a single vertex, but we need to have a starting
+        // vertex to tie the others together. This variable lets us know whether
+        // or not we need to add this first vertex.
+        bool moveFound = false;
+
+        /*
+         * Check each of the neighbors in a cardinal direction.
+         * If they're in range, don't draw a line along that border.
+         * Else, draw the line. If the neighbor doesn't exist, draw
+         * the border as well.
+         */
+
+        // First, find the indices for the LineRenderer.
+
+        // Check the north neighbor.
+        if ((Z() == distances.GetLength(1) - 1) || (distances[X(), Z() + 1] > moveSpeed))
+        {
+            if (!moveFound)
+            {
+                // Add the first vertex (top right).
+                positions.Add(transform.position + (Vector3.forward + Vector3.right) * scale);
+
+                // Now we have a first vertex.
+                moveFound = true;
+            }
+
+            // Add the top left index.
+            positions.Add(transform.position + Vector3.forward * scale);
+        }
+        // Check the east neighbor.
+        if ((X() == 0) || (distances[X() - 1, Z()] > moveSpeed))
+        {
+            if (!moveFound)
+            {
+                // Add the first vertex (top left).
+                positions.Add(transform.position + Vector3.forward * scale);
+
+                // Now we have a first vertex.
+                moveFound = true;
+            }
+
+            // Add the bottom left index.
+            positions.Add(transform.position);
+        }
+        // Check the south neighbor.
+        if ((Z() == 0) || (distances[X(), Z() - 1] > moveSpeed))
+        {
+            if (!moveFound)
+            {
+                // Add the first vertex (bottom left).
+                positions.Add(transform.position);
+
+                // Now we have a first vertex.
+                moveFound = true;
+            }
+
+            // Add the bottom right index.
+            positions.Add(transform.position + Vector3.right * scale);
+        }
+        // Check the west neighbor.
+        if ((X() == distances.GetLength(0) - 1) || (distances[X() + 1, Z()] > moveSpeed))
+        {
+            if (!moveFound)
+            {
+                // Add the first vertex (bottom right).
+                positions.Add(transform.position + Vector3.right * scale);
+            }
+
+            // Add the top right index.
+            positions.Add(transform.position + (Vector3.forward + Vector3.right) * scale);
+        }
+
+        // Next, assign the vertices to the LineRenderer.
+        lineRenderer.numPositions = positions.Count;
+        lineRenderer.SetPositions(positions.ToArray());
+    }
 }

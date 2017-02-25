@@ -8,7 +8,7 @@ public class SquareGrid : BasicGrid
 
     // References to the SquareCell objects that make
     // up the grid.
-    private SquareCell[] _cells;
+    private SquareCell[,] _cells;
 
     // Reference to the mesh used to render the grid.
     private SquareMesh _squareMesh;
@@ -16,7 +16,7 @@ public class SquareGrid : BasicGrid
     // Colors to let us know if we've touched a cell.
     public Color DefaultColor = Color.white;
 
-    public SquareCell[] Cells
+    public SquareCell[,] Cells
     {
         get { return _cells; }
     }
@@ -29,7 +29,12 @@ public class SquareGrid : BasicGrid
 
     public override BasicCell GetBasicCell(int index)
     {
-        return _cells[index];
+        return _cells[index % Width, index / Width];
+    }
+
+    public override BasicCell GetBasicCell(int width, int height)
+    {
+        return _cells[width, height];
     }
 
     /*
@@ -47,7 +52,7 @@ public class SquareGrid : BasicGrid
         _squareMesh = GetComponentInChildren<SquareMesh>();
 
         // Allocate space for each SquareCell.
-        _cells = new SquareCell[Height * Width];
+        _cells = new SquareCell[Height, Width];
 
         // Instantiate the SquareCell objects.
         int index = 0; // Used to index into the cells array.
@@ -55,7 +60,7 @@ public class SquareGrid : BasicGrid
         {
             for (int width = 0; width < Width; width++)
             {
-                CreateCell(width, height, index++);
+                CreateCell(width, height);
             }
         }
 
@@ -84,7 +89,7 @@ public class SquareGrid : BasicGrid
      *   the input location, then adds the prefab to
      *   the cells array.
      */
-    private void CreateCell(int x, int z, int index)
+    private void CreateCell(int x, int z)
     {
         // Determine the coordinates of the new SquareCell.
         Vector3 position;
@@ -94,7 +99,7 @@ public class SquareGrid : BasicGrid
 
         // Create (instantiate) the new SquareCell.
         SquareCell newSquareCell = Instantiate<SquareCell>(CellPrefab);
-        _cells[index] = newSquareCell;
+        _cells[x, z] = newSquareCell;
         newSquareCell.transform.SetParent(transform, false);
         newSquareCell.transform.localPosition = position;
         newSquareCell.Color = DefaultColor;
@@ -105,93 +110,95 @@ public class SquareGrid : BasicGrid
 
     private void SetNeighbors()
     {
-        int numCells = _cells.Length;
-        for (int index = 0; index < numCells; index++)
+        for (int width = 0; width < _cells.GetLength(0); width++)
         {
-            if (index == 0)
+            for (int height = 0; height < _cells.GetLength(1); height++)
             {
-                // Bottom left corner.
-                // Assign N, NE, E
-                _cells[index].SetNeighbor(SquareDirection.N, _cells[index + Width]);
-                _cells[index].SetNeighbor(SquareDirection.NE, _cells[index + Width + 1]);
-                _cells[index].SetNeighbor(SquareDirection.E, _cells[index + 1]);
-            }
-            else if (index == (Width - 1))
-            {
-                // Bottom right corner.
-                // Assign W, NW, N
-                _cells[index].SetNeighbor(SquareDirection.W, _cells[index - 1]);
-                _cells[index].SetNeighbor(SquareDirection.NW, _cells[index + Width - 1]);
-                _cells[index].SetNeighbor(SquareDirection.N, _cells[index + Width]);
-            }
-            else if (index == (numCells - Width))
-            {
-                // Top left corner.
-                // Assign E, SE, S
-                _cells[index].SetNeighbor(SquareDirection.E, _cells[index + 1]);
-                _cells[index].SetNeighbor(SquareDirection.SE, _cells[index - Width + 1]);
-                _cells[index].SetNeighbor(SquareDirection.S, _cells[index - Width]);
-            }
-            else if (index == (numCells - 1))
-            {
-                // Top right corner.
-                // Assign W, SW, S
-                _cells[index].SetNeighbor(SquareDirection.W, _cells[index - 1]);
-                _cells[index].SetNeighbor(SquareDirection.SW, _cells[index - Width - 1]);
-                _cells[index].SetNeighbor(SquareDirection.S, _cells[index - Width]);
-            }
-            else if ((index / Width) == 0)
-            {
-                // Bottom row (not a corner).
-                // Assign W, NW, N, NE, E
-                _cells[index].SetNeighbor(SquareDirection.W, _cells[index - 1]);
-                _cells[index].SetNeighbor(SquareDirection.NW, _cells[index + Width - 1]);
-                _cells[index].SetNeighbor(SquareDirection.N, _cells[index + Width]);
-                _cells[index].SetNeighbor(SquareDirection.NE, _cells[index + Width + 1]);
-                _cells[index].SetNeighbor(SquareDirection.E, _cells[index + 1]);
-            }
-            else if (index % Width == 0)
-            {
-                // Left column (not a corner).
-                // Assign N, NE, E, SE, S
-                _cells[index].SetNeighbor(SquareDirection.N, _cells[index + Width]);
-                _cells[index].SetNeighbor(SquareDirection.NE, _cells[index + Width + 1]);
-                _cells[index].SetNeighbor(SquareDirection.E, _cells[index + 1]);
-                _cells[index].SetNeighbor(SquareDirection.SE, _cells[index - Width + 1]);
-                _cells[index].SetNeighbor(SquareDirection.S, _cells[index - Width]);
-            }
-            else if ((numCells - index) < Width)
-            {
-                // Bottom row (not a corner).
-                // Assign W, SW, S, SE, E
-                _cells[index].SetNeighbor(SquareDirection.W, _cells[index - 1]);
-                _cells[index].SetNeighbor(SquareDirection.SW, _cells[index - Width - 1]);
-                _cells[index].SetNeighbor(SquareDirection.S, _cells[index - Width]);
-                _cells[index].SetNeighbor(SquareDirection.SE, _cells[index - Width + 1]);
-                _cells[index].SetNeighbor(SquareDirection.E, _cells[index + 1]);
-            }
-            else if ((index % Width) == (Width - 1))
-            {
-                // Right column (not a corner).
-                // Assign N, NW, W, SW, S
-                _cells[index].SetNeighbor(SquareDirection.N, _cells[index + Width]);
-                _cells[index].SetNeighbor(SquareDirection.NW, _cells[index + Width - 1]);
-                _cells[index].SetNeighbor(SquareDirection.W, _cells[index - 1]);
-                _cells[index].SetNeighbor(SquareDirection.SW, _cells[index - Width - 1]);
-                _cells[index].SetNeighbor(SquareDirection.S, _cells[index - Width]);
-            }
-            else
-            {
-                // Middle cell.
-                // Assign all neighbors.
-                _cells[index].SetNeighbor(SquareDirection.N, _cells[index + Width]);
-                _cells[index].SetNeighbor(SquareDirection.NE, _cells[index + Width + 1]);
-                _cells[index].SetNeighbor(SquareDirection.E, _cells[index + 1]);
-                _cells[index].SetNeighbor(SquareDirection.SE, _cells[index - Width + 1]);
-                _cells[index].SetNeighbor(SquareDirection.S, _cells[index - Width]);
-                _cells[index].SetNeighbor(SquareDirection.SW, _cells[index - Width - 1]);
-                _cells[index].SetNeighbor(SquareDirection.W, _cells[index - 1]);
-                _cells[index].SetNeighbor(SquareDirection.NW, _cells[index + Width - 1]);
+                if (width == 0 && height == 0)
+                {
+                    // Bottom left corner.
+                    // Assign N, NE, E
+                    _cells[width, height].SetNeighbor(SquareDirection.N, _cells[width, height + 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.NE, _cells[width + 1, height + 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.E, _cells[width + 1, height]);
+                }
+                else if (width == (Width - 1) && height == 0)
+                {
+                    // Bottom right corner.
+                    // Assign W, NW, N
+                    _cells[width, height].SetNeighbor(SquareDirection.W, _cells[width - 1, height]);
+                    _cells[width, height].SetNeighbor(SquareDirection.NW, _cells[width - 1, height + 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.N, _cells[width, height + 1]);
+                }
+                else if (width == 0 && height == (Height - 1))
+                {
+                    // Top left corner.
+                    // Assign E, SE, S
+                    _cells[width, height].SetNeighbor(SquareDirection.E, _cells[width + 1, height]);
+                    _cells[width, height].SetNeighbor(SquareDirection.SE, _cells[width + 1, height - 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.S, _cells[width, height - 1]);
+                }
+                else if (width == (Width - 1) && height == (Height - 1))
+                {
+                    // Top right corner.
+                    // Assign W, SW, S
+                    _cells[width, height].SetNeighbor(SquareDirection.W, _cells[width - 1, height]);
+                    _cells[width, height].SetNeighbor(SquareDirection.SW, _cells[width - 1, height - 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.S, _cells[width, height - 1]);
+                }
+                else if (height == 0)
+                {
+                    // Bottom row (not a corner).
+                    // Assign W, NW, N, NE, E
+                    _cells[width, height].SetNeighbor(SquareDirection.W, _cells[width - 1, height]);
+                    _cells[width, height].SetNeighbor(SquareDirection.NW, _cells[width - 1, height + 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.N, _cells[width, height + 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.NE, _cells[width + 1, height + 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.E, _cells[width + 1, height]);
+                }
+                else if (width == 0)
+                {
+                    // Left column (not a corner).
+                    // Assign N, NE, E, SE, S
+                    _cells[width, height].SetNeighbor(SquareDirection.N, _cells[width, height + 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.NE, _cells[width + 1, height + 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.E, _cells[width + 1, height]);
+                    _cells[width, height].SetNeighbor(SquareDirection.SE, _cells[width + 1, height - 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.S, _cells[width, height - 1]);
+                }
+                else if (height == (Height - 1))
+                {
+                    // Top row (not a corner).
+                    // Assign W, SW, S, SE, E
+                    _cells[width, height].SetNeighbor(SquareDirection.W, _cells[width - 1, height]);
+                    _cells[width, height].SetNeighbor(SquareDirection.SW, _cells[width - 1, height - 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.S, _cells[width, height - 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.SE, _cells[width + 1, height - 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.E, _cells[width + 1, height]);
+                }
+                else if (width == (Width - 1))
+                {
+                    // Right column (not a corner).
+                    // Assign N, NW, W, SW, S
+                    _cells[width, height].SetNeighbor(SquareDirection.N, _cells[width, height + 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.NW, _cells[width - 1, height + 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.W, _cells[width - 1, height]);
+                    _cells[width, height].SetNeighbor(SquareDirection.SW, _cells[width - 1, height - 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.S, _cells[width, height - 1]);
+                }
+                else
+                {
+                    // Middle cell.
+                    // Assign all neighbors.
+                    _cells[width, height].SetNeighbor(SquareDirection.N, _cells[width, height + 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.NE, _cells[width + 1, height + 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.E, _cells[width + 1, height]);
+                    _cells[width, height].SetNeighbor(SquareDirection.SE, _cells[width + 1, height - 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.S, _cells[width, height - 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.SW, _cells[width - 1, height - 1]);
+                    _cells[width, height].SetNeighbor(SquareDirection.W, _cells[width - 1, height]);
+                    _cells[width, height].SetNeighbor(SquareDirection.NW, _cells[width - 1, height + 1]);
+                }
             }
         }
     }
@@ -202,7 +209,7 @@ public class SquareGrid : BasicGrid
         position = transform.InverseTransformPoint(position);
         SquareCoordinates coordinates = SquareCoordinates.FromPosition(position, ScaleFactor);
         int index = coordinates.X + coordinates.Z * Width;
-        SquareCell cell = _cells[index];
+        SquareCell cell = _cells[coordinates.X, coordinates.Z];
 
         // Edit the cell's color and triangulate again.
         cell.Color = color;

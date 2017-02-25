@@ -33,6 +33,11 @@ public class HexGrid : BasicGrid
         return _cells[index];
     }
 
+    public override BasicCell GetBasicCell(int width, int height)
+    {
+        return _cells[width + height * Width];
+    }
+
     /*
      * Method:
      *   Awake

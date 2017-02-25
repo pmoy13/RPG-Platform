@@ -13,4 +13,7 @@ public abstract class RPGSystem
      *   movement rules from the system.
      */
     public abstract float CalculateMovementCost(BasicCell cell, int neighbor);
+
+    // TODO: Description.
+    public abstract float CalculateSquareGridMovementCost(SquareCell baseCell, int size, SquareDirection direction);
 }
