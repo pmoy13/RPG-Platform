@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Generic/Engine/Movement/Scenes/Test Scenes/SPTTestScene.unity
+- path: Assets/Scenes/Test Scenes/SPTTestScene.unity
   isLoaded: 1
   isActive: 1
