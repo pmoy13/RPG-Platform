@@ -165,10 +165,10 @@ public static class AStar
 public class AStarResults
 {
     // The path from source to destination.
-    public List<int> path;
+    public List<int> Path;
 
     // The weight of the path.
-    public int pathWeight;
+    public int PathWeight;
 
     /*
      * Method:
@@ -183,7 +183,7 @@ public class AStarResults
     public AStarResults(List<int> path, int pathWeight)
     {
         // Assign the members.
-        this.path = path;
-        this.pathWeight = pathWeight;
+        this.Path = path;
+        this.PathWeight = pathWeight;
     }
 }

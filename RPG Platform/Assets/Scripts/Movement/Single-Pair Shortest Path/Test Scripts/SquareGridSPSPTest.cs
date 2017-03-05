@@ -1,14 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class SquareGridSPSPTest : MonoBehaviour {
 
     public SquareGrid grid;
-    public AStarResults results;
-    public List<int> path;
-    public int weight;
-    public DD5eSystem RpgSystem;
+    public SquareMesh squareMesh;
+    public CreatureSquareMove creature;
 
     // Use this for initialization
     void Start()
@@ -16,26 +13,42 @@ public class SquareGridSPSPTest : MonoBehaviour {
         grid.Cells[0, 1].IsWalkable = false;
         grid.Cells[1, 1].IsWalkable = false;
         grid.Cells[2, 1].IsWalkable = false;
-        RpgSystem = new DD5eSystem();
-        results = SquareMovement.CalculateSquareGridPath(grid, RpgSystem.CalculateMovementCost,
-                                                    12, 0, int.MaxValue);
-
-        path = new List<int>();
-        if (results != null)
-        {
-            path = results.path;
-            weight = results.pathWeight;
-        }
-        else
-        {
-            Debug.Log("No valid path found!");
-        }
-        
     }
 
-    // Update is called once per frame
-    void Update()
+    // TODO: Description.
+    private void Update()
     {
+        if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject())
+        {
+            // Reset the grid to white so we can see the new path.
+            TestResetGrid();
 
+            // Draw the new path.
+            TestHighlightPath();
+
+            // Show our changes!
+            squareMesh.Triangulate(grid.Cells);
+        }
+    }
+
+    private void TestHighlightPath()
+    {
+        Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        if (Physics.Raycast(inputRay, out hit))
+        {
+            creature.HighlightMove(grid.TouchCell(hit.point));
+        }
+    }
+
+    private void TestResetGrid()
+    {
+        for (int width = 0; width < grid.Width; width++)
+        {
+            for (int height = 0; height < grid.Height; height++)
+            {
+                grid.Cells[width, height].Color = Color.white;
+            }
+        }
     }
 }

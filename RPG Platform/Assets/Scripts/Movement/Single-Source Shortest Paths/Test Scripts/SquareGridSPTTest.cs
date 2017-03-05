@@ -7,18 +7,21 @@ public class SquareGridSPTTest : MonoBehaviour
 {
     public SquareGrid grid;
     public float[] distances;
-    public DD5eSystem RpgSystem;
+    public GameSystem gameSystem;
+    private RPGSystem _system;
 
 	// Use this for initialization
 	void Start ()
 	{
+	    _system = gameSystem.GetCurrentSystem();
+
 	    grid.Cells[0, 1].IsWalkable = false;
 	    grid.Cells[1, 1].IsWalkable = false;
 	    grid.Cells[2, 1].IsWalkable = false;
-        RpgSystem = new DD5eSystem();
+
 		distances = DijkstraSPT.CalculateDistances(
-            SquareMovement.GetAdjacencyListFromGrid(grid, DD5eSystem.SquareLargeSize,
-                RpgSystem.CalculateSquareGridMovementCost), 12);
+            SquareMovement.GetAdjacencyListFromGrid(grid, 1,
+                _system.CalculateSquareGridMovementCost), 12);
 	}
 	
 	// Update is called once per frame

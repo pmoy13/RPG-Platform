@@ -33,7 +33,7 @@ public class SquareMapEditor : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(inputRay, out hit))
         {
-            SquareGrid.TouchCell(hit.point, _activeColor);
+            //SquareGrid.TouchCell(hit.point, _activeColor);
         }
     }
 

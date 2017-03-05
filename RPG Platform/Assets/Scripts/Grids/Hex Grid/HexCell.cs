@@ -39,7 +39,7 @@ public class HexCell : BasicCell
         return _neighbors;
     }
 
-    public override void Highlight(int[,] distances, float scale, int moveSpeed)
+    public override void Highlight(Color color)
     {
         throw new System.NotImplementedException();
     }

@@ -1,6 +1,25 @@
-﻿
+﻿/*
+ * File:
+ *   SquareMovement
+ * 
+ * Description:
+ *   This file contains a static class which calculates
+ *   creature movement over a square grid. The methods
+ *   are system-agnostic, and take as an argument the
+ *   relevant system-specific functions.
+ */
+
 using System;
 
+/*
+ * Class:
+ *   SquareMovement
+ * 
+ * Description:
+ *   This is a static class which contains static methods
+ *   used to calculate movement over a square grid. These
+ *   should be used during structured time, like combat.
+ */
 public static class SquareMovement
 {
     /*
@@ -94,17 +113,30 @@ public static class SquareMovement
      *   it returns null to denote the creature cannot make the
      *   specified move with the given maximum distance.
      */
-    public static AStarResults CalculateSquareGridPath(SquareGrid grid,
-        Func<BasicCell, int, float> edgeFunc, int source, int dest, int totalMoves)
+    public static AStarResults CalculateSquareGridPath(SquareGrid grid, CreatureSquareMove creature,
+        Func<SquareCell, int, SquareDirection, float> edgeFunc, int source, int dest)
     {
         // Calculate the shortest path using the A* algorithm.
-        AStarResults results = AStar.CalculatePath(grid.Width, new AdjacencyList(grid, edgeFunc),
+        AStarResults results = AStar.CalculatePath(grid.Width,
+            GetAdjacencyListFromGrid(grid, creature.SquareSize, edgeFunc),
                                    source, dest, SquareGridHeuristic);
 
         // Does the path exist and cost less than the allowable cost?
-        if (results != null && results.pathWeight <= totalMoves)
+        if (results != null && results.PathWeight <= creature.MoveSpeed)
         {
-            // Yes, so return it.
+            // Yes, so we need to convert the path from a graph path to a grid path.
+            for (int graphIndex = 0; graphIndex < results.Path.Count; graphIndex++)
+            {
+                // Get the Z-coordinate of the index with respect to the graph.
+                int graphHeight =
+                    results.Path[graphIndex]/(grid.Width - (creature.SquareSize - 1));
+
+                // For each row of height, we need to add the size of the creature - 1
+                // to account for the difference in sizes between the graph and the grid.
+                results.Path[graphIndex] += graphHeight * (creature.SquareSize - 1);
+            }
+
+            // Return the grid indices.
             return results;
         }
         // No, so the path is invalid.
@@ -123,8 +155,7 @@ public static class SquareMovement
      *   each of the other cells in the grid. This function
      *   can tolerate multiple size creatures.
      */
-
-    public static int[,] CalculateDistances(SquareGrid grid, Creature creature,
+    public static int[,] CalculateDistances(SquareGrid grid, CreatureSquareMove creature,
         Func<SquareCell, int, SquareDirection, float> calculateEdgeCost)
     {
         // Calculate the distances from the point of view of a graph.

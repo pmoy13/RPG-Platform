@@ -55,7 +55,6 @@ public class SquareGrid : BasicGrid
         _cells = new SquareCell[Height, Width];
 
         // Instantiate the SquareCell objects.
-        int index = 0; // Used to index into the cells array.
         for (int height = 0; height < Height; height++)
         {
             for (int width = 0; width < Width; width++)
@@ -203,17 +202,13 @@ public class SquareGrid : BasicGrid
         }
     }
 
-    public void TouchCell(Vector3 position, Color color)
+    public int TouchCell(Vector3 position)
     {
         // Determine which cell was touched.
         position = transform.InverseTransformPoint(position);
         SquareCoordinates coordinates = SquareCoordinates.FromPosition(position, ScaleFactor);
-        int index = coordinates.X + coordinates.Z * Width;
-        SquareCell cell = _cells[coordinates.X, coordinates.Z];
-
-        // Edit the cell's color and triangulate again.
-        cell.Color = color;
-        // TODO: See if we can optimize and only triangule the changed cells.
-        _squareMesh.Triangulate(_cells);
+        
+        // Return the coordinates of the touched cell.
+        return (coordinates.X + Width * coordinates.Z);
     }
 }
