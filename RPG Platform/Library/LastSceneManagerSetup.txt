@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Scenes/Test Scenes/SPTTestScene.unity
+- path: Assets/Scenes/Test Scenes/SQLiteTestScene.unity
   isLoaded: 1
   isActive: 1
